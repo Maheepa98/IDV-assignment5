@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IDV Assignment 05 – Integrated A1–A4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- D3 for A3 & A4 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #ffffff; /* Simple, white background */
+      color: #111827;
+      overflow-x: hidden; /* no horizontal scroll */
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 40px 16px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    h1 { font-size: 26px; margin-bottom: 4px; }
+    h2 { font-size: 20px; margin-bottom: 8px; }
+    h3 { font-size: 18px; margin-bottom: 4px; }
+
+    p {
+      margin: 0 0 8px 0;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    a { color: #0f766e; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Cards / sections */
+    section { margin-top: 18px; }
+
+    .section-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 16px 18px 16px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 8px 25px rgba(15,23,42,0.06);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+    }
+
+    .section-note {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .assignment-body { margin-top: 4px; font-size: 14px; }
+
+    /* Overview tags */
+    .overview-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    /* Assignment 1: table */
+    #a1-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    #a1-table th, #a1-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+    #a1-table th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+    #a1-table tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    .small-caption {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* Assignment 2: SVG 10x5 table */
+    #a2-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    #a2-table th, #a2-table td {
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    #a2-table th {
+      background: #f9fafb;
+      font-size: 13px;
+    }
+    .svg-cell svg {
+      width: 60px;
+      height: 60px;
+      display: block;
+      margin: 0 auto;
+      background: #ffffff; /* keep white behind shapes */
+    }
+
+    /* Assignment 3: chart container */
+    #a3-container {
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      margin-top: 6px;
+    }
+    .a3-caption {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* Assignment 4: heatmap */
+    #a4-controls {
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+    #a4-controls label { color: #374151; }
+    #a4-metric-select {
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      font-size: 13px;
+      outline: none;
+    }
+    .axis text {
+      fill: #374151;
+      font-size: 11px;
+    }
+    .axis line, .axis path {
+      stroke: #d1d5db;
+    }
+    .a4-cell-border {
+      stroke: #e5e7eb;
+      stroke-width: 1px;
+    }
+    .a4-heatmap-rect {
+      cursor: pointer;
+      shape-rendering: crispEdges;
+    }
+    .a4-heatmap-rect:hover {
+      stroke: #f97316;
+      stroke-width: 2px;
+    }
+    .legend {
+      font-size: 11px;
+      fill: #374151;
+    }
+    .a4-caption {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* Tooltip (for A3 & A4) */
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15,23,42,0.96);
+      color: #f9fafb;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 8px 20px rgba(15,23,42,0.45);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+      z-index: 20;
+      max-width: 260px;
+    }
+    .tooltip-title { font-weight: 600; margin-bottom: 4px; }
+    .tooltip-sub { color: #9ca3af; margin-bottom: 4px; }
+    .tooltip-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .tooltip-label { color: #9ca3af; }
+    .tooltip-value { font-weight: 500; }
+
+    @media (max-width: 768px) {
+      svg {
+        width: 100% !important;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- ============== OVERVIEW (Assignment 05 requirement) ============== -->
+    <section class="section-card">
+      <h1>IDV Assignment 05 – Integrated Visualisations (A1–A4)</h1>
+      <p>
+        This single page combines my work from <strong>Assignment 01–04</strong>:
+        an API-driven data table (A1), SVG transformations (A2),
+        an interactive D3 chart with transitions (A3), and a complex/grouped
+        data visualisation (A4). All four sections share a simple, consistent
+        card layout, typography and spacing.
+      </p>
+      <p style="font-size: 13px; color:#4b5563;">
+        When integrating four separate assignments, the main challenges were
+        avoiding CSS/ID conflicts and making sure each JavaScript visualisation
+        runs correctly inside a shared HTML structure. The most difficult part
+        was merging Assignment 3 and 4, because both rely on D3, specific SVG
+        sizes and dynamic transitions. I solved this by:
+        (1) giving each assignment its own container,
+        (2) using separate initialisation functions called after
+        <code>DOMContentLoaded</code>,
+        and (3) keeping IDs and styles scoped to their own sections so that
+        the charts do not interfere with each other.
+      </p>
+      <div class="overview-tags">
+        <span class="tag">Assignments 01–04 integrated</span>
+        <span class="tag">Consistent layout & spacing</span>
+        <span class="tag">No horizontal scrolling</span>
+      </div>
+    </section>
+
+    <!-- ============== ASSIGNMENT 01 – API TABLE ============== -->
+    <section class="section-card" id="assignment1">
+      <div class="section-header">
+        <div>
+          <div class="section-label">Assignment 01</div>
+          <h2>Traffic Images – API-driven Data Table</h2>
+        </div>
+        <div class="section-note">
+          Data from <code>https://api.data.gov.sg/v1/transport/traffic-images</code>
+        </div>
+      </div>
+      <div class="assignment-body">
+        <p>
+          This table fetches real-time traffic camera data from the
+          <strong>Traffic Images</strong> dataset on data.gov.sg.
+          Each row shows a camera ID, timestamp, coordinates and a link to the current image.
+        </p>
+        <table id="a1-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Camera ID</th>
+              <th>Timestamp</th>
+              <th>Location (lat, lon)</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+          <tbody id="a1-tbody">
+            <tr><td colspan="5">Loading data from API…</td></tr>
+          </tbody>
+        </table>
+        <p class="small-caption">
+          Data source: Traffic Images API from the data.gov.sg dataset page.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============== ASSIGNMENT 02 – 10×5 SVG GRID ============== -->
+    <section class="section-card" id="assignment2">
+      <div class="section-header">
+        <div>
+          <div class="section-label">Assignment 02</div>
+          <h2>SVG Transformations – 10 Icons × 5 Effects</h2>
+        </div>
+        <div class="section-note">
+          Original · Mirrored · Rotated 180° · Vertically ×0.5 · Grayscale
+        </div>
+      </div>
+      <div class="assignment-body">
+        <p>
+          For each of the 10 non-symmetric SVG icons below, the 5 columns show:
+          <strong>Original</strong>, <strong>Left–Right Mirrored</strong>,
+          <strong>Rotated 180°</strong>, <strong>Vertically squeezed to 50%</strong>,
+          and <strong>Grayscale</strong> (only colour changed).
+        </p>
+        <table id="a2-table">
+          <thead>
+            <tr>
+              <th>Original</th>
+              <th>Mirrored (L–R)</th>
+              <th>Rotated 180°</th>
+              <th>Vertically ×0.5</th>
+              <th>Grayscale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1 – Arrow -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,30 35,15 35,25 50,25 50,35 35,35 35,45" fill="#f97316"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <polygon points="10,30 35,15 35,25 50,25 50,35 35,35 35,45" fill="#f97316"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <polygon points="10,30 35,15 35,25 50,25 50,35 35,35 35,45" fill="#f97316"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <polygon points="10,30 35,15 35,25 50,25 50,35 35,35 35,45" fill="#f97316"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,30 35,15 35,25 50,25 50,35 35,35 35,45" fill="#777777"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 2 – House -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,30 30,10 50,30" fill="#3b82f6"/>
+                  <rect x="15" y="30" width="30" height="18" fill="#60a5fa"/>
+                  <rect x="26" y="34" width="8" height="14" fill="#1d4ed8"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <polygon points="10,30 30,10 50,30" fill="#3b82f6"/>
+                    <rect x="15" y="30" width="30" height="18" fill="#60a5fa"/>
+                    <rect x="26" y="34" width="8" height="14" fill="#1d4ed8"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <polygon points="10,30 30,10 50,30" fill="#3b82f6"/>
+                    <rect x="15" y="30" width="30" height="18" fill="#60a5fa"/>
+                    <rect x="26" y="34" width="8" height="14" fill="#1d4ed8"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <polygon points="10,30 30,10 50,30" fill="#3b82f6"/>
+                    <rect x="15" y="30" width="30" height="18" fill="#60a5fa"/>
+                    <rect x="26" y="34" width="8" height="14" fill="#1d4ed8"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,30 30,10 50,30" fill="#777777"/>
+                  <rect x="15" y="30" width="30" height="18" fill="#999999"/>
+                  <rect x="26" y="34" width="8" height="14" fill="#555555"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 3 – Chat bubble -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="14" width="34" height="22" rx="6" fill="#22c55e"/>
+                  <polygon points="24,36 28,42 14,36" fill="#22c55e"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <rect x="10" y="14" width="34" height="22" rx="6" fill="#22c55e"/>
+                    <polygon points="24,36 28,42 14,36" fill="#22c55e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <rect x="10" y="14" width="34" height="22" rx="6" fill="#22c55e"/>
+                    <polygon points="24,36 28,42 14,36" fill="#22c55e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <rect x="10" y="14" width="34" height="22" rx="6" fill="#22c55e"/>
+                    <polygon points="24,36 28,42 14,36" fill="#22c55e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="14" width="34" height="22" rx="6" fill="#808080"/>
+                  <polygon points="24,36 28,42 14,36" fill="#808080"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 4 – Map pin -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <path d="M30 8 C23 8 18 13 18 20 C18 29 30 40 30 40 C30 40 42 29 42 20 C42 13 37 8 30 8 Z" fill="#ef4444"/>
+                  <circle cx="32" cy="20" r="4" fill="#fee2e2"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <path d="M30 8 C23 8 18 13 18 20 C18 29 30 40 30 40 C30 40 42 29 42 20 C42 13 37 8 30 8 Z" fill="#ef4444"/>
+                    <circle cx="32" cy="20" r="4" fill="#fee2e2"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <path d="M30 8 C23 8 18 13 18 20 C18 29 30 40 30 40 C30 40 42 29 42 20 C42 13 37 8 30 8 Z" fill="#ef4444"/>
+                    <circle cx="32" cy="20" r="4" fill="#fee2e2"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <path d="M30 8 C23 8 18 13 18 20 C18 29 30 40 30 40 C30 40 42 29 42 20 C42 13 37 8 30 8 Z" fill="#ef4444"/>
+                    <circle cx="32" cy="20" r="4" fill="#fee2e2"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <path d="M30 8 C23 8 18 13 18 20 C18 29 30 40 30 40 C30 40 42 29 42 20 C42 13 37 8 30 8 Z" fill="#7f1d1d"/>
+                  <circle cx="32" cy="20" r="4" fill="#e5e5e5"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 5 – Car -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="26" width="34" height="10" rx="3" fill="#0ea5e9"/>
+                  <polygon points="16,26 24,18 36,18 42,26" fill="#38bdf8"/>
+                  <circle cx="18" cy="38" r="4" fill="#111827"/>
+                  <circle cx="36" cy="38" r="4" fill="#111827"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <rect x="10" y="26" width="34" height="10" rx="3" fill="#0ea5e9"/>
+                    <polygon points="16,26 24,18 36,18 42,26" fill="#38bdf8"/>
+                    <circle cx="18" cy="38" r="4" fill="#111827"/>
+                    <circle cx="36" cy="38" r="4" fill="#111827"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <rect x="10" y="26" width="34" height="10" rx="3" fill="#0ea5e9"/>
+                    <polygon points="16,26 24,18 36,18 42,26" fill="#38bdf8"/>
+                    <circle cx="18" cy="38" r="4" fill="#111827"/>
+                    <circle cx="36" cy="38" r="4" fill="#111827"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <rect x="10" y="26" width="34" height="10" rx="3" fill="#0ea5e9"/>
+                    <polygon points="16,26 24,18 36,18 42,26" fill="#38bdf8"/>
+                    <circle cx="18" cy="38" r="4" fill="#111827"/>
+                    <circle cx="36" cy="38" r="4" fill="#111827"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="26" width="34" height="10" rx="3" fill="#a3a3a3"/>
+                  <polygon points="16,26 24,18 36,18 42,26" fill="#d4d4d4"/>
+                  <circle cx="18" cy="38" r="4" fill="#404040"/>
+                  <circle cx="36" cy="38" r="4" fill="#404040"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 6 – Asymmetric flare -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,22 28,20 30,8 36,24 50,26 36,32 34,46 26,34 14,38" fill="#eab308"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <polygon points="10,22 28,20 30,8 36,24 50,26 36,32 34,46 26,34 14,38" fill="#eab308"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <polygon points="10,22 28,20 30,8 36,24 50,26 36,32 34,46 26,34 14,38" fill="#eab308"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <polygon points="10,22 28,20 30,8 36,24 50,26 36,32 34,46 26,34 14,38" fill="#eab308"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="10,22 28,20 30,8 36,24 50,26 36,32 34,46 26,34 14,38" fill="#a3a3a3"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 7 – Tree -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <circle cx="28" cy="18" r="10" fill="#22c55e"/>
+                  <circle cx="36" cy="24" r="8" fill="#16a34a"/>
+                  <circle cx="22" cy="26" r="7" fill="#4ade80"/>
+                  <rect x="26" y="28" width="6" height="16" fill="#92400e"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <circle cx="28" cy="18" r="10" fill="#22c55e"/>
+                    <circle cx="36" cy="24" r="8" fill="#16a34a"/>
+                    <circle cx="22" cy="26" r="7" fill="#4ade80"/>
+                    <rect x="26" y="28" width="6" height="16" fill="#92400e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <circle cx="28" cy="18" r="10" fill="#22c55e"/>
+                    <circle cx="36" cy="24" r="8" fill="#16a34a"/>
+                    <circle cx="22" cy="26" r="7" fill="#4ade80"/>
+                    <rect x="26" y="28" width="6" height="16" fill="#92400e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <circle cx="28" cy="18" r="10" fill="#22c55e"/>
+                    <circle cx="36" cy="24" r="8" fill="#16a34a"/>
+                    <circle cx="22" cy="26" r="7" fill="#4ade80"/>
+                    <rect x="26" y="28" width="6" height="16" fill="#92400e"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <circle cx="28" cy="18" r="10" fill="#a3a3a3"/>
+                  <circle cx="36" cy="24" r="8" fill="#8c8c8c"/>
+                  <circle cx="22" cy="26" r="7" fill="#d4d4d4"/>
+                  <rect x="26" y="28" width="6" height="16" fill="#525252"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 8 – Folder -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <path d="M10 18 H26 L30 24 H50 V40 H10 Z" fill="#f97316"/>
+                  <rect x="10" y="22" width="40" height="18" fill="#fed7aa"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <path d="M10 18 H26 L30 24 H50 V40 H10 Z" fill="#f97316"/>
+                    <rect x="10" y="22" width="40" height="18" fill="#fed7aa"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <path d="M10 18 H26 L30 24 H50 V40 H10 Z" fill="#f97316"/>
+                    <rect x="10" y="22" width="40" height="18" fill="#fed7aa"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <path d="M10 18 H26 L30 24 H50 V40 H10 Z" fill="#f97316"/>
+                    <rect x="10" y="22" width="40" height="18" fill="#fed7aa"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <path d="M10 18 H26 L30 24 H50 V40 H10 Z" fill="#a8a29e"/>
+                  <rect x="10" y="22" width="40" height="18" fill="#d4d4d4"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 9 – Play button -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="14" width="32" height="32" rx="6" fill="#1d4ed8"/>
+                  <polygon points="24,20 38,30 24,38" fill="#bfdbfe"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <rect x="10" y="14" width="32" height="32" rx="6" fill="#1d4ed8"/>
+                    <polygon points="24,20 38,30 24,38" fill="#bfdbfe"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <rect x="10" y="14" width="32" height="32" rx="6" fill="#1d4ed8"/>
+                    <polygon points="24,20 38,30 24,38" fill="#bfdbfe"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <rect x="10" y="14" width="32" height="32" rx="6" fill="#1d4ed8"/>
+                    <polygon points="24,20 38,30 24,38" fill="#bfdbfe"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <rect x="10" y="14" width="32" height="32" rx="6" fill="#737373"/>
+                  <polygon points="24,20 38,30 24,38" fill="#d4d4d4"/>
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Row 10 – Irregular badge -->
+            <tr>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="18,10 40,14 50,28 42,44 22,48 12,30" fill="#a855f7"/>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(60,0) scale(-1,1)">
+                    <polygon points="18,10 40,14 50,28 42,44 22,48 12,30" fill="#a855f7"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="rotate(180,30,30)">
+                    <polygon points="18,10 40,14 50,28 42,44 22,48 12,30" fill="#a855f7"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <g transform="translate(0,15) scale(1,0.5)">
+                    <polygon points="18,10 40,14 50,28 42,44 22,48 12,30" fill="#a855f7"/>
+                  </g>
+                </svg>
+              </td>
+              <td class="svg-cell">
+                <svg viewBox="0 0 60 60">
+                  <polygon points="18,10 40,14 50,28 42,44 22,48 12,30" fill="#a3a3a3"/>
+                </svg>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="small-caption">
+          All icons are non-symmetric, and this section keeps the pure white background required in Assignment 02.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============== ASSIGNMENT 03 – INTERACTIVE D3 CHART ============== -->
+    <section class="section-card" id="assignment3">
+      <div class="section-header">
+        <div>
+          <div class="section-label">Assignment 03</div>
+          <h2>Interactive Line Chart with Transitions</h2>
+        </div>
+        <div class="section-note">
+          Hover tooltips · Animated transitions between datasets
+        </div>
+      </div>
+      <div class="assignment-body">
+        <p>
+          This D3 line chart shows monthly values. Buttons switch between two
+          datasets with smooth transitions; hovering a point shows a tooltip.
+        </p>
+        <div id="a3-container"></div>
+        <div class="a3-caption">
+          Demonstrates user interaction (hover/tooltips) and D3 transitions when switching datasets.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== ASSIGNMENT 04 – HEATMAP (OPTION 1) ============== -->
+    <section class="section-card" id="assignment4">
+      <div class="section-header">
+        <div>
+          <div class="section-label">Assignment 04</div>
+          <h2>Grouped Data Heatmap – Robust Classification Methods</h2>
+        </div>
+        <div class="section-note">
+          Option 1 data · Metric selector · Tooltip & transitions
+        </div>
+      </div>
+      <div class="assignment-body">
+        <p>
+          Heatmap showing Standard Accuracy, Certified Robustness Rate and Certified Robust Accuracy
+          across different methods and datasets. Use the dropdown to choose which metric drives the colours.
+        </p>
+        <div id="a4-controls">
+          <label for="a4-metric-select">Metric shown as colour:</label>
+          <select id="a4-metric-select">
+            <option value="standard">Standard Accuracy (%)</option>
+            <option value="robustnessRate">Certified Robustness Rate (%)</option>
+            <option value="robustAccuracy">Certified Robust Accuracy (%)</option>
+          </select>
+        </div>
+        <svg id="a4-heatmap" width="900" height="420"></svg>
+        <div class="a4-caption">
+          Hover any cell to view all metrics for that method–dataset pair. Colour and legend update when
+          you change the selected metric; cells animate smoothly.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    // ============= A1 – API TABLE =============
+    async function initA1() {
+      const tbody = document.getElementById("a1-tbody");
+      if (!tbody) return;
+
+      try {
+        const res = await fetch("https://api.data.gov.sg/v1/transport/traffic-images");
+        const data = await res.json();
+        tbody.innerHTML = "";
+
+        const items = data.items || [];
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="5">No data from API.</td></tr>';
+          return;
+        }
+
+        const first = items[0];
+        const cameras = first.cameras || [];
+        if (!cameras.length) {
+          tbody.innerHTML = '<tr><td colspan="5">No cameras in response.</td></tr>';
+          return;
+        }
+
+        cameras.forEach((cam, idx) => {
+          const tr = document.createElement("tr");
+          const camId = cam.camera_id || "–";
+          const ts = cam.timestamp || first.timestamp || "–";
+          const lat = cam.location && cam.location.latitude != null
+            ? cam.location.latitude.toFixed(5) : "–";
+          const lon = cam.location && cam.location.longitude != null
+            ? cam.location.longitude.toFixed(5) : "–";
+          const img = cam.image || "";
+
+          tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td>${camId}</td>
+            <td>${ts}</td>
+            <td>${lat}, ${lon}</td>
+            <td>${img ? `<a href="${img}" target="_blank" rel="noopener">Open image</a>` : "–"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Traffic images API error:", err);
+        tbody.innerHTML = '<tr><td colspan="5">Failed to load data from API.</td></tr>';
+      }
+    }
+
+    // ============= A3 – INTERACTIVE LINE CHART =============
+    function initA3() {
+      const container = d3.select("#a3-container");
+      if (container.empty()) return;
+
+      const width = 900;
+      const height = 260;
+      const margin = { top: 30, right: 40, bottom: 40, left: 50 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = container.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const datasetA = [
+        { month: "Jan", value: 12 },
+        { month: "Feb", value: 18 },
+        { month: "Mar", value: 15 },
+        { month: "Apr", value: 22 },
+        { month: "May", value: 27 },
+        { month: "Jun", value: 25 }
+      ];
+      const datasetB = [
+        { month: "Jan", value: 8 },
+        { month: "Feb", value: 14 },
+        { month: "Mar", value: 20 },
+        { month: "Apr", value: 19 },
+        { month: "May", value: 24 },
+        { month: "Jun", value: 30 }
+      ];
+
+      let currentData = datasetA;
+
+      const xScale = d3.scalePoint()
+        .domain(datasetA.map(d => d.month))
+        .range([0, innerWidth])
+        .padding(0.5);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, 32])
+        .nice()
+        .range([innerHeight, 0]);
+
+      const xAxis = d3.axisBottom(xScale);
+      const yAxis = d3.axisLeft(yScale).ticks(5);
+
+      g.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${innerHeight})`)
+        .call(xAxis);
+
+      g.append("g")
+        .attr("class", "axis")
+        .call(yAxis);
+
+      const line = d3.line()
+        .x(d => xScale(d.month))
+        .y(d => yScale(d.value))
+        .curve(d3.curveMonotoneX);
+
+      const linePath = g.append("path")
+        .datum(currentData)
+        .attr("fill", "none")
+        .attr("stroke", "#0ea5e9")
+        .attr("stroke-width", 2)
+        .attr("d", line)
+        .attr("stroke-dasharray", function() {
+          const len = this.getTotalLength();
+          return len + " " + len;
+        })
+        .attr("stroke-dashoffset", function() { return this.getTotalLength(); });
+
+      linePath.transition()
+        .duration(800)
+        .attr("stroke-dashoffset", 0);
+
+      const pointsGroup = g.append("g");
+      const tooltip = d3.select("#tooltip");
+
+      function drawPoints(data) {
+        const circles = pointsGroup.selectAll("circle")
+          .data(data, d => d.month);
+
+        circles.enter()
+          .append("circle")
+          .attr("cx", d => xScale(d.month))
+          .attr("cy", d => yScale(d.value))
+          .attr("r", 0)
+          .attr("fill", "#0ea5e9")
+          .on("mouseover", (event, d) => {
+            tooltip
+              .style("opacity", 1)
+              .style("transform", "translateY(0px)")
+              .html(`
+                <div class="tooltip-title">Month: ${d.month}</div>
+                <div class="tooltip-row">
+                  <span class="tooltip-label">Value:</span>
+                  <span class="tooltip-value">${d.value}</span>
+                </div>
+              `);
+            const [x, y] = d3.pointer(event, document.body);
+            const h = tooltip.node().offsetHeight;
+            tooltip
+              .style("left", (x + 12) + "px")
+              .style("top", (y - h / 2) + "px");
+          })
+          .on("mousemove", (event, d) => {
+            const [x, y] = d3.pointer(event, document.body);
+            const h = tooltip.node().offsetHeight;
+            tooltip
+              .style("left", (x + 12) + "px")
+              .style("top", (y - h / 2) + "px");
+          })
+          .on("mouseout", () => {
+            tooltip
+              .style("opacity", 0)
+              .style("transform", "translateY(4px)");
+          })
+          .transition()
+          .duration(400)
+          .attr("r", 4);
+
+        circles.transition()
+          .duration(600)
+          .attr("cx", d => xScale(d.month))
+          .attr("cy", d => yScale(d.value));
+
+        circles.exit()
+          .transition()
+          .duration(300)
+          .attr("r", 0)
+          .remove();
+      }
+
+      drawPoints(currentData);
+
+      const controls = container.append("div")
+        .style("margin-top", "6px")
+        .style("display", "flex")
+        .style("gap", "8px")
+        .style("flex-wrap", "wrap");
+
+      function updateChart(data, color) {
+        currentData = data;
+
+        linePath
+          .datum(currentData)
+          .transition()
+          .duration(700)
+          .attr("stroke", color)
+          .attr("d", line)
+          .attr("stroke-dasharray", function() {
+            const len = this.getTotalLength();
+            return len + " " + len;
+          })
+          .attr("stroke-dashoffset", function() { return this.getTotalLength(); })
+          .transition()
+          .duration(700)
+          .attr("stroke-dashoffset", 0);
+
+        drawPoints(currentData);
+      }
+
+      function addButton(label, dataset, color) {
+        controls.append("button")
+          .text(label)
+          .style("padding", "4px 10px")
+          .style("border-radius", "999px")
+          .style("border", "1px solid #d1d5db")
+          .style("background", "#ffffff")
+          .style("font-size", "12px")
+          .style("cursor", "pointer")
+          .on("mouseover", function() {
+            d3.select(this).style("background", "#f3f4f6");
+          })
+          .on("mouseout", function() {
+            d3.select(this).style("background", "#ffffff");
+          })
+          .on("click", () => updateChart(dataset, color));
+      }
+
+      addButton("Dataset A", datasetA, "#0ea5e9");
+      addButton("Dataset B", datasetB, "#f97316");
+    }
+
+    // ============= A4 – HEATMAP (OPTION 1) =============
+    function initA4Heatmap() {
+      const svg = d3.select("#a4-heatmap");
+      if (svg.empty()) return;
+
+      const approaches = ["ERM", "DA", "PGDT", "TRADES", "MART", "RS", "IBP", "PRL", "TandT"];
+      const datasets = ["CIFAR-100", "CIFAR-10", "SVHN", "MNIST"];
+
+      const rawTable = {
+        ERM: {
+          standard:      [81.03, 94.85, 94.44, 99.37],
+          robustnessRate:[ 9.28,  1.25, 52.72, 26.01],
+          robustAccuracy:[ 4.52,  1.25, 51.04, 24.96]
+        },
+        DA: {
+          standard:      [78.27, 94.21, 94.69, 99.42],
+          robustnessRate:[15.04, 81.08, 82.08, 85.23],
+          robustAccuracy:[ 6.15, 76.07, 82.01, 84.12]
+        },
+        PGDT: {
+          standard:      [64.35, 84.38, 91.19, 99.16],
+          robustnessRate:[57.07, 87.07, 87.89, 94.65],
+          robustAccuracy:[32.93, 82.90, 86.68, 94.63]
+        },
+        TRADES: {
+          standard:      [62.55, 80.42, 86.16, 99.10],
+          robustnessRate:[59.27, 88.54, 87.89, 94.76],
+          robustAccuracy:[38.85, 78.80, 84.76, 94.61]
+        },
+        MART: {
+          standard:      [63.68, 81.54, 90.20, 98.94],
+          robustnessRate:[58.79, 78.90, 85.23, 94.13],
+          robustAccuracy:[49.37, 72.21, 78.82, 94.09]
+        },
+        RS: {
+          standard:      [56.87, 89.45, 88.35, 97.16],
+          robustnessRate:[60.38, 90.00, 76.29, 87.15],
+          robustAccuracy:[47.50, 87.98, 70.64, 86.29]
+        },
+        IBP: {
+          standard:      [39.45, 48.40, 73.09, 97.78],
+          robustnessRate:[49.34, 54.70, 61.94, 89.18],
+          robustAccuracy:[29.20, 40.00, 57.26, 88.51]
+        },
+        PRL: {
+          standard:      [64.89, 93.82, 92.00, 99.32],
+          robustnessRate:[56.71, 90.71, 93.11, 96.03],
+          robustAccuracy:[50.77, 90.63, 91.07, 95.01]
+        },
+        TandT: {
+          standard:      [65.56, 94.23, 94.79, 99.32],
+          robustnessRate:[62.05, 95.08, 93.15, 97.80],
+          robustAccuracy:[52.07, 91.75, 92.81, 96.80]
+        }
+      };
+
+      const heatmapData = [];
+      approaches.forEach(ap => {
+        datasets.forEach((ds, i) => {
+          heatmapData.push({
+            approach: ap,
+            dataset: ds,
+            standard: rawTable[ap].standard[i],
+            robustnessRate: rawTable[ap].robustnessRate[i],
+            robustAccuracy: rawTable[ap].robustAccuracy[i]
+          });
+        });
+      });
+
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+      const margin = { top: 50, right: 120, bottom: 70, left: 120 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const xScale = d3.scaleBand()
+        .domain(datasets)
+        .range([0, innerWidth])
+        .padding(0.05);
+
+      const yScale = d3.scaleBand()
+        .domain(approaches)
+        .range([0, innerHeight])
+        .padding(0.05);
+
+      const colorScale = d3.scaleSequential()
+        .domain([0, 100])
+        .interpolator(d3.interpolateYlGnBu);
+
+      const xAxis = d3.axisTop(xScale);
+      const yAxis = d3.axisLeft(yScale);
+
+      g.append("g").attr("class", "axis x-axis").call(xAxis);
+      g.append("g").attr("class", "axis y-axis").call(yAxis);
+
+      g.append("rect")
+        .attr("class", "a4-cell-border")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", innerWidth)
+        .attr("height", innerHeight)
+        .attr("fill", "none");
+
+      // Legend
+      const legendWidth = 200;
+      const legendHeight = 10;
+      const legendGroup = svg.append("g")
+        .attr("transform", `translate(${width - margin.right + 10},${margin.top})`);
+
+      const legendScale = d3.scaleLinear()
+        .domain(colorScale.domain())
+        .range([0, legendWidth]);
+
+      const defs = svg.append("defs");
+      const gradient = defs.append("linearGradient")
+        .attr("id", "legend-gradient")
+        .attr("x1", "0%")
+        .attr("x2", "100%")
+        .attr("y1", "0%")
+        .attr("y2", "0%");
+
+      d3.range(0, 1.01, 0.1).forEach(t => {
+        gradient.append("stop")
+          .attr("offset", `${t * 100}%`)
+          .attr("stop-color", colorScale(
+            colorScale.domain()[0] + t * (colorScale.domain()[1] - colorScale.domain()[0])
+          ));
+      });
+
+      legendGroup.append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .style("fill", "url(#legend-gradient)")
+        .attr("rx", 5)
+        .attr("ry", 5);
+
+      const legendAxis = d3.axisBottom(legendScale)
+        .ticks(4)
+        .tickFormat(d => d + "%");
+
+      legendGroup.append("g")
+        .attr("transform", `translate(0,${legendHeight})`)
+        .attr("class", "legend")
+        .call(legendAxis);
+
+      legendGroup.append("text")
+        .attr("class", "legend")
+        .attr("x", 0)
+        .attr("y", -6)
+        .text("Metric value");
+
+      const tooltip = d3.select("#tooltip");
+
+      const metricOptions = {
+        standard: { key: "standard", label: "Standard Accuracy (%)" },
+        robustnessRate: { key: "robustnessRate", label: "Certified Robustness Rate (%)" },
+        robustAccuracy: { key: "robustAccuracy", label: "Certified Robust Accuracy (%)" }
+      };
+      let currentMetric = metricOptions.standard;
+
+      function showTooltip(event, d) {
+        const k = currentMetric.key;
+        const lbl = currentMetric.label;
+
+        tooltip
+          .style("opacity", 1)
+          .style("transform", "translateY(0px)")
+          .html(`
+            <div class="tooltip-title">${d.approach}</div>
+            <div class="tooltip-sub">${d.dataset}</div>
+            <div class="tooltip-row">
+              <span class="tooltip-label">Standard:</span>
+              <span class="tooltip-value">${d.standard.toFixed(2)}%</span>
+            </div>
+            <div class="tooltip-row">
+              <span class="tooltip-label">Cert. Robust Rate:</span>
+              <span class="tooltip-value">${d.robustnessRate.toFixed(2)}%</span>
+            </div>
+            <div class="tooltip-row">
+              <span class="tooltip-label">Cert. Robust Acc.:</span>
+              <span class="tooltip-value">${d.robustAccuracy.toFixed(2)}%</span>
+            </div>
+            <hr style="border:0;border-top:1px solid #4b5563;margin:6px 0;">
+            <div class="tooltip-row">
+              <span class="tooltip-label">Colour metric:</span>
+              <span class="tooltip-value">${lbl} = ${d[k].toFixed(2)}%</span>
+            </div>
+          `);
+
+        const [x, y] = d3.pointer(event, document.body);
+        const h = tooltip.node().offsetHeight;
+        tooltip
+          .style("left", (x + 12) + "px")
+          .style("top", (y - h / 2) + "px");
+      }
+
+      function hideTooltip() {
+        tooltip
+          .style("opacity", 0)
+          .style("transform", "translateY(4px)");
+      }
+
+      const cells = g.selectAll(".a4-heatmap-rect")
+        .data(heatmapData)
+        .enter()
+        .append("rect")
+        .attr("class", "a4-heatmap-rect")
+        .attr("x", d => xScale(d.dataset))
+        .attr("y", d => yScale(d.approach))
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("width", xScale.bandwidth())
+        .attr("height", yScale.bandwidth())
+        .attr("fill", d => colorScale(d[currentMetric.key]))
+        .attr("opacity", 0)
+        .on("mouseover", function(event, d) {
+          d3.select(this)
+            .raise()
+            .transition().duration(150)
+            .attr("stroke", "#f97316")
+            .attr("stroke-width", 2);
+          showTooltip(event, d);
+        })
+        .on("mousemove", showTooltip)
+        .on("mouseout", function() {
+          d3.select(this)
+            .transition().duration(150)
+            .attr("stroke-width", 0);
+          hideTooltip();
+        });
+
+      cells.transition()
+        .delay((d, i) => i * 10)
+        .duration(600)
+        .attr("opacity", 1);
+
+      const metricSelect = d3.select("#a4-metric-select");
+      metricSelect.on("change", e => {
+        const selected = e.target.value;
+        currentMetric = metricOptions[selected];
+        cells.transition()
+          .duration(750)
+          .attr("fill", d => colorScale(d[currentMetric.key]));
+      });
+    }
+
+    // ============= INIT ALL =============
+    document.addEventListener("DOMContentLoaded", () => {
+      initA1();
+      initA3();
+      initA4Heatmap();
+    });
+  </script>
+</body>
+</html>
